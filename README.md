@@ -15,9 +15,12 @@ Now there must be a folder `xpDeploy` under `%userprofile%/.vscode/extensions` w
 <br>
 Restart vscode and enjoy.
 
-```
-Warning: Windows Explorer 'Extract all' command will create an extra folder with the same name of the zip. Please remove that extra path of the string when unzipping
-```
+---
+**Note**
+
+Windows Explorer 'Extract all' command will create an extra folder with the same name of the zip. Please remove that extra path of the string when unzipping
+
+---
 
 ## Settings
 ```json
