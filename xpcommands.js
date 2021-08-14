@@ -56,24 +56,16 @@ function deploy(choiceDeployment) {
 		return;
 	}
 
+	if (!fs.existsSync(deployment.target)) {
+		vscode.window.showErrorMessage('Deploy: target does not exist: ' + deployment.target);
+		return;
+	}
+
 	const sources = xpSettings.sources;
 	const source = sources.find(i => i.name === deployment.source);
 
 	if (!source) {
 		vscode.window.showErrorMessage('Deploy: invalid source: ' + deployment.source);
-		return;
-	}
-
-	const targets = xpSettings.targets;
-	const target = targets.find(i => i.name === deployment.target);
-
-	if (!target) {
-		vscode.window.showErrorMessage('Deploy: invalid target: ' + deployment.target);
-		return;
-	}
-
-	if (!fs.existsSync(target.path)) {
-		vscode.window.showErrorMessage('Deploy: target does not exist: ' + target.path);
 		return;
 	}
 
@@ -86,7 +78,7 @@ function deploy(choiceDeployment) {
 
 		return new Promise((commandResolve, commandReject) => {
 
-			const targetPath = vscode.Uri.parse(target.path);
+			const targetPath = vscode.Uri.parse(deployment.target);
 
 			let inclusion = source.include || '';
 			if (Array.isArray(inclusion)) {
