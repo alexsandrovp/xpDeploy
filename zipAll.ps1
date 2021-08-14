@@ -1,10 +1,12 @@
 Remove-Item ./build -Recurse -Force -ErrorAction SilentlyContinue
-New-Item ./build/xpDeploy -ItemType Directory
-Copy-Item .\.vscodeignore ./build/xpDeploy/
-Copy-Item .\CHANGELOG.md ./build/xpDeploy/
-Copy-Item .\extension.js ./build/xpDeploy/
-Copy-Item .\package.json ./build/xpDeploy/
-Copy-Item .\README.md ./build/xpDeploy/
-Copy-Item .\xpcommands.js ./build/xpDeploy/
-Copy-Item .\xputils.js ./build/xpDeploy/
-Compress-Archive ./build/xpDeploy xpDeploy.zip -CompressionLevel Optimal
+$version = (Get-Content .\package.json | ConvertFrom-Json).version
+$dirName = "./build/xpDeploy-$version"
+New-Item $dirName -ItemType Directory
+Copy-Item .\.vscodeignore $dirName
+Copy-Item .\CHANGELOG.md $dirName
+Copy-Item .\extension.js $dirName
+Copy-Item .\package.json $dirName
+Copy-Item .\README.md $dirName
+Copy-Item .\xpcommands.js $dirName
+Copy-Item .\xputils.js $dirName
+Compress-Archive $dirName xpDeploy.zip -CompressionLevel Optimal
