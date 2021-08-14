@@ -1,0 +1,150 @@
+{
+	"name": "xp",
+	"displayName": "xp",
+	"description": "copy files",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.59.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "xp.deploy",
+				"title": "xpDeploy"
+			},
+			{
+				"command": "xp.deployWithChoice",
+				"title": "xpDeploy..."
+			}
+		],
+		"configuration": [
+			{
+				"title": "xp",
+				"properties": {
+					"xp": {
+						"type": "object",
+						"properties": {
+							"defaultDeployment": {
+								"description": "Id of the default deployment",
+								"type": "string"
+							},
+							"deployments": {
+								"type": "array",
+								"scope": "application",
+								"items": {
+									"description": "An object containing an id and a map from source to target",
+									"type": "object",
+									"properties": {
+										"name": {
+											"description": "Deployment id",
+											"type": "string"
+										},
+										"source": {
+											"description": "Selected source id",
+											"type": "string"
+										},
+										"target": {
+											"description": "Selected target id",
+											"type": "string"
+										}
+									}
+								}
+							},
+							"targets": {
+								"type": "array",
+								"scope": "application",
+								"items": {
+									"description": "An object containing an id and a path in the local machine",
+									"type": "object",
+									"properties": {
+										"name": {
+											"description": "An identifier for this target",
+											"type": "string"
+										},
+										"path": {
+											"description": "A target path in the local machine",
+											"type": "string"
+										}
+									}
+								}
+							},
+							"sources": {
+								"type": "array",
+								"scope": "application",
+								"items": {
+									"description": "An object describing the source files to deploy",
+									"type": "object",
+									"properties": {
+										"name": {
+											"description": "An identifier for this source",
+											"type": "string"
+										},
+										"include": {
+											"description": "An array of relative paths in the workspace with glob patterns for files to include in deployment",
+											"type": "array",
+											"items": {
+												"type": "string"
+											}
+										},
+										"exclude": {
+											"description": "An array of relative paths in the workspace with glob patterns for files to exclude from deployment",
+											"type": "array",
+											"items": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							},
+							"createButton": {
+								"default": false,
+								"oneOf": [
+									{
+										"type": "boolean"
+									},
+									{
+										"type": "object",
+										"properties": {
+											"label": {
+												"description": "Button label",
+												"type": "string"
+											},
+											"withChoice": {
+												"description": "true to activate deployWithChoice, false for defaultDeployment",
+												"type": "boolean",
+												"default": false
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		]
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"test": "node ./test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.59.0",
+		"@types/glob": "^7.1.3",
+		"@types/mocha": "^8.2.2",
+		"@types/node": "14.x",
+		"eslint": "^7.27.0",
+		"glob": "^7.1.7",
+		"mocha": "^8.4.0",
+		"typescript": "^4.3.2",
+		"vscode-test": "^1.5.2"
+	}
+}
