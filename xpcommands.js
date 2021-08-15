@@ -7,19 +7,22 @@ function enumerate(workspace, include, exclude) {
 	return vscode.workspace.findFiles(pattern, exclude);
 }
 
-function workOnFile(workspace, targetPath, file) {
-	const subpath = file.fsPath.substr(workspace.uri.fsPath.length + 1);
+function workOnFile(workspace, targetPath, file, mapping) {
+	let subpath = file.fsPath.substr(workspace.uri.fsPath.length + 1);
+	if (mapping && mapping.regex) {
+		subpath = subpath.replace(mapping.regex, mapping.replace);
+	}
 	let dest = vscode.Uri.joinPath(targetPath, subpath);
 	dest = dest.scheme + ':' + dest.fsPath;
 	xpu.mkdir(dest);
 	fs.copyFileSync(file.fsPath, dest);
 }
 
-function workOnFiles(workspace, targetPath, files, progress, commandResolve, commandReject) {
+function workOnFiles(workspace, targetPath, files, mapping, progress, commandResolve, commandReject) {
 	progress.report({ message: 'coping' });
 	setTimeout(() => {
 		try {
-			files.forEach(file => workOnFile(workspace, targetPath, file));
+			files.forEach(file => workOnFile(workspace, targetPath, file, mapping));
 			commandResolve();
 		} catch (err) {
 			commandReject(err);
@@ -69,6 +72,11 @@ function deploy(choiceDeployment) {
 		return;
 	}
 
+	const mapping = {
+		regex: new RegExp(source.mapping.regex, 'i'),
+		replace: source.mapping.replace
+	};
+
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: 'Deploy',
@@ -95,7 +103,7 @@ function deploy(choiceDeployment) {
 			}
 
 			enumerate(workspace, inclusion, exclusion).then(
-				files => workOnFiles(workspace, targetPath, files, progress, commandResolve, commandReject),
+				files => workOnFiles(workspace, targetPath, files, mapping, progress, commandResolve, commandReject),
 				err => commandReject(err)
 			);
 		});

@@ -37,7 +37,6 @@
 							},
 							"deployments": {
 								"type": "array",
-								"scope": "application",
 								"items": {
 									"description": "An object containing an id and a map from source to target",
 									"type": "object",
@@ -51,25 +50,7 @@
 											"type": "string"
 										},
 										"target": {
-											"description": "Selected target id",
-											"type": "string"
-										}
-									}
-								}
-							},
-							"targets": {
-								"type": "array",
-								"scope": "application",
-								"items": {
-									"description": "An object containing an id and a path in the local machine",
-									"type": "object",
-									"properties": {
-										"name": {
-											"description": "An identifier for this target",
-											"type": "string"
-										},
-										"path": {
-											"description": "A target path in the local machine",
+											"description": "A path in local machine",
 											"type": "string"
 										}
 									}
@@ -77,7 +58,6 @@
 							},
 							"sources": {
 								"type": "array",
-								"scope": "application",
 								"items": {
 									"description": "An object describing the source files to deploy",
 									"type": "object",
@@ -86,19 +66,47 @@
 											"description": "An identifier for this source",
 											"type": "string"
 										},
+										"mapping": {
+											"description": "Any path that matches the regex will have it replaced",
+											"type": "object",
+											"properties": {
+												"regex": {
+													"description": "regex to match",
+													"type": "string"
+												},
+												"replace": {
+													"description": "regex replacement",
+													"type": "string"
+												}
+											}
+										},
 										"include": {
 											"description": "An array of relative paths in the workspace with glob patterns for files to include in deployment",
-											"type": "array",
-											"items": {
-												"type": "string"
-											}
+											"oneOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												}
+											]
 										},
 										"exclude": {
 											"description": "An array of relative paths in the workspace with glob patterns for files to exclude from deployment",
-											"type": "array",
-											"items": {
-												"type": "string"
-											}
+											"oneOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												}
+											]
 										}
 									}
 								}
