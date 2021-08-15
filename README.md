@@ -25,38 +25,42 @@ Windows Explorer 'Extract all' command will create an extra folder with the same
 ## Settings
 ```json
 "xp": {
-    "defaultDeployment": "latest",
-    "createButton": {
-        "label": "Deploy to localhost",
-        "withChoice": true
-    },
-    "deployments": [
-        {
-            "name": "latest",
-            "source": "workspaceSrc",
-            "target": "D:/deployments/latest"
-        },
-        {
-            "name": "v2",
-            "source": "workspaceSrc",
-            "target": "D:/deployments/v2"
-        }
-    ],
-    "sources": [
-        {
-            "name": "workspaceSrc",
-            "include": [
-                "src/**/*"
-            ],
-            "exclude": [
-                "src/**/*.less",
-                "src/**/*.scss"
-            ]
-        },
-        {
-            "name": "allFiles",
-            "include": "**/*"
-        }
-    ]
+	"defaultDeployment": "latest",
+	"createButton": {
+		"label": "Deploy to localhost",
+		"withChoice": true
+	},
+	"deployments": [
+		{
+			"name": "latest",
+			"source": "workspaceSrc",
+			"target": "D:/deployments/latest"
+		},
+		{
+			"name": "v2",
+			"source": "workspaceSrc",
+			"target": "D:/deployments/v2"
+		}
+	],
+	"sources": [
+		{
+			"name": "workspaceSrc",
+			"include": [
+				"src/**/*"
+			],
+			"exclude": [
+				"src/**/*.less",
+				"src/**/*.scss"
+			],
+			"mapping": {
+				"regex": "^src",
+				"replace": ""
+			}
+		},
+		{
+			"name": "allFiles",
+			"include": "**/*"
+		}
+	]
 }
 ```
