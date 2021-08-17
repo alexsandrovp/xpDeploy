@@ -53,8 +53,8 @@ Windows Explorer 'Extract all' command will create an extra folder with the same
 				"src/**/*.scss"
 			],
 			"mapping": {
-				"regex": "^src",
-				"replace": ""
+				"regex": "^src[/\\\\]whatever",
+				"replace": "something/else"
 			}
 		},
 		{

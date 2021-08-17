@@ -9,11 +9,18 @@ function enumerate(workspace, include, exclude) {
 
 function workOnFile(workspace, targetPath, file, mapping) {
 	let subpath = file.fsPath.substr(workspace.uri.fsPath.length + 1);
+	console.log('------------');
+	console.log('copying file ' + file.fsPath);
+	console.log('relative path ' + subpath);
+
 	if (mapping && mapping.regex) {
+		//console.log('applying mapping ' + mapping.regex.toString() + ' -> ' + mapping.replace);
 		subpath = subpath.replace(mapping.regex, mapping.replace);
+		console.log('mapped relative path ' + subpath);
 	}
 	let dest = vscode.Uri.joinPath(targetPath, subpath);
 	dest = dest.scheme + ':' + dest.fsPath;
+	console.log('destination path ' + dest);
 	xpu.mkdir(dest);
 	fs.copyFileSync(file.fsPath, dest);
 }
