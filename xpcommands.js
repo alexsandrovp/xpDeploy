@@ -39,7 +39,22 @@ function workOnFiles(workspace, targetPath, files, mapping, progress, commandRes
 
 async function deployWithChoice() {
 	const xpSettings = vscode.workspace.getConfiguration('xp');
+
+	if (!xpSettings.deployments) {
+		vscode.window.showErrorMessage('Deploy: invalid configuration, missing "deployments"');
+		return;
+	}
+
 	const deployments = xpSettings.deployments.map(d => d.name).filter(d => (d || '').toString().trim());
+	if (deployments.length <= 0) {
+		vscode.window.showErrorMessage('Deploy: invalid configuration, "deployments" section is empty');
+		return;
+	}
+	
+	if (deployments.length === 1) {
+		deploy(deployments[0]);
+		return;
+	}
 
 	const input = await vscode.window.showQuickPick(deployments);
 	deploy(input);
@@ -59,6 +74,12 @@ function deploy(choiceDeployment) {
 		selectedDeployment = xpSettings.defaultDeployment;
 	}
 	const deployments = xpSettings.deployments;
+	
+	if (!deployments) {
+		vscode.window.showErrorMessage('Deploy: invalid configuration, missing "deployments"');
+		return;
+	}
+
 	const deployment = deployments.find(i => i.name === selectedDeployment);
 
 	if (!deployment) {
