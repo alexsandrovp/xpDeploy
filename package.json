@@ -132,6 +132,10 @@
 										}
 									}
 								]
+							},
+							"watch": {
+								"type": "string",
+								"default": null
 							}
 						}
 					}

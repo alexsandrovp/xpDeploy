@@ -2,6 +2,11 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const xpcmd = require('./xpcommands');
+const xpwatch = require('./xpwatcher');
+const xpu = require('./xputils');
+
+let xpwatcher = null;
+let xpSettings = null;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -15,31 +20,42 @@ function activate(context) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Extension "xp" is now active');
 
-	const xpSettings = vscode.workspace.getConfiguration('xp');
-	if (xpSettings.createButton) {
-		const button = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
-		button.text = (xpSettings.createButton.label || '').toString().trim() || 'xpDeploy';
-		let buttonCmd = xpSettings.createButton.withChoice ? 'xp.deployWithChoice' : 'xp.deploy';
-		button.command = buttonCmd;
-		button.show();
+	xpSettings = vscode.workspace.getConfiguration('xp');
+	const error = xpu.getSettingsError(xpSettings);
+	if (error) {
+		console.error('Extension "xp" settings error: ' + error);
+		vscode.window.showErrorMessage('xpDeploy: ' + error);
+		return;
 	}
+
+	xpcmd.createButton(xpSettings);
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand('xp.deploy', function () {
-		xpcmd.deploy();
+		xpcmd.deploy(xpSettings);
 	});
 	context.subscriptions.push(disposable);
 
 	disposable = vscode.commands.registerCommand('xp.deployWithChoice', function () {
-		xpcmd.deployWithChoice();
+		xpcmd.deployWithChoice(xpSettings);
 	});
 	context.subscriptions.push(disposable);
+
+	if (xpSettings.watch) {
+		xpwatcher = new xpwatch.XPWatcher(xpSettings);
+		if (xpwatcher && xpwatcher.invalid) {
+			xpwatcher = null;
+			vscode.window.showErrorMessage('Could not create workspace watcher, files will not be automatically deployed when changed');
+		}
+	}
 }
 
 // this method is called when your extension is deactivated
-function deactivate() { }
+function deactivate() {
+	if (xpwatcher) xpwatcher.dispose();
+}
 
 module.exports = {
 	activate,

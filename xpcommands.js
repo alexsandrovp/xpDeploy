@@ -8,7 +8,7 @@ function enumerate(workspace, include, exclude) {
 }
 
 function workOnFile(workspace, targetPath, file, mapping) {
-	let subpath = file.fsPath.substr(workspace.uri.fsPath.length + 1);
+	let subpath = file.path.substr(workspace.uri.path.length + 1);
 	console.log('------------');
 	console.log('copying file ' + file.fsPath);
 	console.log('relative path ' + subpath);
@@ -37,30 +37,17 @@ function workOnFiles(workspace, targetPath, files, mapping, progress, commandRes
 	});
 }
 
-async function deployWithChoice() {
-	const xpSettings = vscode.workspace.getConfiguration('xp');
-
-	if (!xpSettings.deployments) {
-		vscode.window.showErrorMessage('Deploy: invalid configuration, missing "deployments"');
-		return;
-	}
-
+async function deployWithChoice(xpSettings) {
 	const deployments = xpSettings.deployments.map(d => d.name).filter(d => (d || '').toString().trim());
-	if (deployments.length <= 0) {
-		vscode.window.showErrorMessage('Deploy: invalid configuration, "deployments" section is empty');
-		return;
-	}
-	
 	if (deployments.length === 1) {
-		deploy(deployments[0]);
+		deploy(xpSettings, deployments[0]);
 		return;
 	}
-
 	const input = await vscode.window.showQuickPick(deployments);
-	deploy(input);
+	if (input) deploy(xpSettings, input);
 }
 
-function deploy(choiceDeployment) {
+function deploy(xpSettings, choiceDeployment) {
 
 	const workspace = xpu.getWorkspace();
 	if (!workspace) {
@@ -68,42 +55,19 @@ function deploy(choiceDeployment) {
 		return;
 	}
 
-	const xpSettings = vscode.workspace.getConfiguration('xp');
 	let selectedDeployment = choiceDeployment;
 	if (!selectedDeployment) {
 		selectedDeployment = xpSettings.defaultDeployment;
 	}
-	const deployments = xpSettings.deployments;
-	
-	if (!deployments) {
-		vscode.window.showErrorMessage('Deploy: invalid configuration, missing "deployments"');
-		return;
-	}
-
-	const deployment = deployments.find(i => i.name === selectedDeployment);
-
+	const deployment = xpu.selectDeployment(xpSettings, selectedDeployment);
 	if (!deployment) {
-		vscode.window.showErrorMessage('Deploy: invalid deployment: ' + selectedDeployment);
+		vscode.window.showErrorMessage('xpDeploy: could not select deployment ' + selectedDeployment);
 		return;
 	}
-
 	if (!fs.existsSync(deployment.target)) {
-		vscode.window.showErrorMessage('Deploy: target does not exist: ' + deployment.target);
+		vscode.window.showErrorMessage('xpDeploy: target does not exist: ' + deployment.target);
 		return;
 	}
-
-	const sources = xpSettings.sources;
-	const source = sources.find(i => i.name === deployment.source);
-
-	if (!source) {
-		vscode.window.showErrorMessage('Deploy: invalid source: ' + deployment.source);
-		return;
-	}
-
-	const mapping = {
-		regex: new RegExp(source.mapping.regex, 'i'),
-		replace: source.mapping.replace
-	};
 
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
@@ -111,40 +75,31 @@ function deploy(choiceDeployment) {
 		cancellable: false
 	}, progress => {
 		progress.report({ message: 'coping' });
-
 		return new Promise((commandResolve, commandReject) => {
-
 			const targetPath = vscode.Uri.parse(deployment.target);
-
-			let inclusion = source.include || '';
-			if (Array.isArray(inclusion)) {
-				inclusion = '{' + inclusion.join(',') + '}';
-			} else {
-				inclusion = inclusion.toString();
-			}
-
-			let exclusion = source.exclude || '';
-			if (Array.isArray(exclusion)) {
-				exclusion = '{' + exclusion.join(',') + '}';
-			} else {
-				exclusion = exclusion.toString();
-			}
-
+			const inclusion = xpu.buildGlobPattern(deployment.include);
+			const exclusion = xpu.buildGlobPattern(deployment.exclude);
 			enumerate(workspace, inclusion, exclusion).then(
-				files => workOnFiles(workspace, targetPath, files, mapping, progress, commandResolve, commandReject),
+				files => workOnFiles(workspace, targetPath, files, deployment.mapping, progress, commandResolve, commandReject),
 				err => commandReject(err)
 			);
 		});
-
 	}).then(
-		msg => {
-			vscode.window.setStatusBarMessage(msg || 'Deploy: all done', 6000);
-		},
-		err => {
-			vscode.window.showErrorMessage('Deploy error: ' + err);
-		}
+		msg => vscode.window.setStatusBarMessage(msg || 'Deploy: all done', 4000),
+		err => vscode.window.showErrorMessage('Deploy error: ' + err)
 	);
+}
+
+function createButton(xpSettings) {
+	if (xpSettings.createButton) {
+		const button = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
+		button.text = (xpSettings.createButton.label || '').toString().trim() || 'xpDeploy';
+		let buttonCmd = xpSettings.createButton.withChoice ? 'xp.deployWithChoice' : 'xp.deploy';
+		button.command = buttonCmd;
+		button.show();
+	}
 }
 
 exports.deploy = deploy;
 exports.deployWithChoice = deployWithChoice;
+exports.createButton = createButton;
