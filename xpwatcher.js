@@ -7,6 +7,7 @@ function XPWatcher(xpSettings) {
 	const queue = [];
 
 	let executor = null;
+	let toaster = null;
 
 	const watchSettings = xpu.selectDeployment(xpSettings, xpSettings.watch);
 	if (!watchSettings) {
@@ -33,48 +34,50 @@ function XPWatcher(xpSettings) {
 	
 	self.dispose = () => watcher.dispose();
 
-	function execute() {
-		const toaster = vscode.window.withProgress({
+	function createToaster(title) {
+		let p, resolve, reject;
+		if (!title) title = 'Deploy';
+		const t = vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
-			title: 'Deploy',
+			title: title,
 			cancellable: false
 		}, progress => {
-			progress.report({ message: 'coping' });
-			return new Promise((commandResolve, commandReject) => {
-				let hasErrors = false;
-				while(queue.length) {
-					//const runner = queue.shift();
-					//if (runner) setTimeout(runner);
-					try {
-						queue.shift()();
-					} catch (error) {
-						console.error('xpDeploy watch: ' + error);
-						hasErrors = true;
-					}
-				}
-				if (hasErrors) commandReject('Some files could not be copied. Please see the console for more information');
-				else commandResolve();
+			p = progress;
+			return new Promise((toasterResolve, toasterReject) => {
+				resolve = toasterResolve;
+				reject = toasterReject;
 			});
 		});
-
-		toaster.then(
+		t.then(
 			msg => vscode.window.setStatusBarMessage(msg || 'Deploy (watch): all done', 4000),
 			err => vscode.window.showErrorMessage('Deploy error (watch): ' + err)
 		);
+		return {progress: p, resolve, reject};
+	}
+
+	function execute() {
+		let hasErrors = false;
+		while(queue.length) {
+			try {
+				//const runner = queue.shift();
+				//if (runner) setTimeout(runner);
+				queue.shift()();
+			} catch (error) {
+				console.error('xpDeploy watch: ' + error);
+				hasErrors = true;
+			}
+		}
+		if (toaster) {
+			if (hasErrors) toaster.reject('Some files could not be copied. Please see the console for more information');
+			else toaster.resolve();
+			toaster = null;
+		}
 	}
 
 	function processEvent(event) {
 		if (!event) return;
 		if (!event.file) return;
 		if (event.file.scheme !== 'file') return;
-
-		/*
-		const workspace = xpu.getWorkspace();
-		if (!workspace) {
-			console.error('xpDeploy watch: no workspace');
-			return;
-		}
-		*/
 
 		const file = event.file;
 		if (!file.path.startsWith(workspace.uri.path)) {
@@ -92,6 +95,11 @@ function XPWatcher(xpSettings) {
 		if (executor) {
 			clearTimeout(executor);
 			executor = null;
+		}
+
+		if (!toaster) {
+			toaster = createToaster();
+			toaster.progress.report({ message: 'copying' });
 		}
 
 		vscode.workspace.fs.stat(file).then(
@@ -116,7 +124,7 @@ function XPWatcher(xpSettings) {
 							xpu.mkdir(dest);
 							fs.copyFileSync(file.fsPath, dest);
 						});
-						executor = setTimeout(execute, 800);
+						executor = setTimeout(execute, 600);
 					} catch (error) {
 						console.error('xpDeploy watch: ' + error);
 						vscode.window.showErrorMessage('xpDeploy watch: ' + error);
@@ -128,8 +136,6 @@ function XPWatcher(xpSettings) {
 				vscode.window.showErrorMessage('xpDeploy watch: ' + error);
 			}
 		);
-
-		
 	}
 
 	watcher.onDidChange(file => processEvent({type: 'change', file}));

@@ -67,33 +67,6 @@ function getSettingsError(xpSettings) {
 	return null;
 }
 
-function Defer() {
-	const self = this;
-
-	let res = null;
-	let status = null;
-	
-	self.resolve = result => {
-		res = result;
-		status = '1';
-	};
-	
-	self.reject = error => {
-		res = error;
-		status = '2';
-	};
-
-	self.promise = new Promise((resolve, reject) => {
-		checkStatus(resolve, reject);
-	});
-
-	function checkStatus(resolve, reject) {
-		if (status === '1') resolve(res);
-		else if (status === '2') reject(res);
-		else setTimeout(checkStatus, 100, resolve, reject);
-	}
-}
-
 function selectDeployment(xpSettings, deploymentName) {
 	if (!deploymentName) return null;
 	const filtered = xpSettings.deployments.filter(d => d.name === deploymentName);
@@ -122,6 +95,14 @@ function buildGlobPattern(pattern) {
 		x = x.toString();
 	}
 	return x;
+}
+
+function Defer() {
+	const self = this;
+	self.promise = new Promise((resolve, reject) => {
+		self.resolve = resolve;
+		self.reject = reject;
+	});
 }
 
 exports.mkdir = mkdir;

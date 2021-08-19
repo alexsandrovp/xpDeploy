@@ -26,7 +26,7 @@ function workOnFile(workspace, targetPath, file, mapping) {
 }
 
 function workOnFiles(workspace, targetPath, files, mapping, progress, commandResolve, commandReject) {
-	progress.report({ message: 'coping' });
+	progress.report({ message: 'copying' });
 	setTimeout(() => {
 		try {
 			files.forEach(file => workOnFile(workspace, targetPath, file, mapping));
@@ -74,7 +74,7 @@ function deploy(xpSettings, choiceDeployment) {
 		title: 'Deploy',
 		cancellable: false
 	}, progress => {
-		progress.report({ message: 'coping' });
+		progress.report({ message: 'copying' });
 		return new Promise((commandResolve, commandReject) => {
 			const targetPath = vscode.Uri.parse(deployment.target);
 			const inclusion = xpu.buildGlobPattern(deployment.include);
