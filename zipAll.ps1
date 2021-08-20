@@ -7,6 +7,5 @@ Copy-Item .\CHANGELOG.md $dirName
 Copy-Item .\extension.js $dirName
 Copy-Item .\package.json $dirName
 Copy-Item .\README.md $dirName
-Copy-Item .\xpcommands.js $dirName
-Copy-Item .\xputils.js $dirName
+Copy-Item .\xp*.js $dirName
 Compress-Archive $dirName xpDeploy.zip -CompressionLevel Optimal

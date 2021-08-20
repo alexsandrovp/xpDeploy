@@ -38,6 +38,10 @@ function workOnFiles(workspace, targetPath, files, mapping, progress, commandRes
 }
 
 async function deployWithChoice(xpSettings) {
+	if (!xpSettings.deployments || !xpSettings.deployments.length) {
+		vscode.window.showErrorMessage('xpDeploy: no deployments configured');
+		return;
+	}
 	const deployments = xpSettings.deployments.map(d => d.name).filter(d => (d || '').toString().trim());
 	if (deployments.length === 1) {
 		deploy(xpSettings, deployments[0]);

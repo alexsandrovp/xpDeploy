@@ -2,7 +2,7 @@
 	"name": "xp",
 	"displayName": "xp",
 	"description": "copy files",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"engines": {
 		"vscode": "^1.59.0"
 	},
@@ -21,7 +21,7 @@
 			},
 			{
 				"command": "xp.deployWithChoice",
-				"title": "xpDeploy..."
+				"title": "xpDeploy ..."
 			}
 		],
 		"configuration": [

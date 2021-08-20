@@ -47,7 +47,7 @@ function activate(context) {
 		xpwatcher = new xpwatch.XPWatcher(xpSettings);
 		if (xpwatcher && xpwatcher.invalid) {
 			xpwatcher = null;
-			vscode.window.showErrorMessage('Could not create workspace watcher, files will not be automatically deployed when changed');
+			vscode.window.showErrorMessage('xpDeploy: could not create workspace watcher, modified files will not be automatically deployed');
 		}
 	}
 }
