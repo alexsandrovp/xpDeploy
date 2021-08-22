@@ -137,9 +137,9 @@
 								"type": "string",
 								"default": null
 							},
-							"watchBatchDelay": {
+							"batchDelay": {
 								"type": "integer",
-								"default": 600,
+								"default": 800,
 								"description": "milisseconds to wait without any watcher events before dispatching a batch of files"
 							}
 						}

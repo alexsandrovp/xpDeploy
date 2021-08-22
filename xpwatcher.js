@@ -126,7 +126,7 @@ function XPWatcher(xpSettings) {
 						console.error('xpDeploy watch: ' + error);
 						vscode.window.showErrorMessage('xpDeploy watch: ' + error);
 					} finally {
-						executor = setTimeout(execute, watchSettings.watchBatchDelay || 600);
+						executor = setTimeout(execute, parseInt(xpSettings.batchDelay) || 800);
 					}
 				}
 			},
