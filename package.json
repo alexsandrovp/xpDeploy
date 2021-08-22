@@ -1,6 +1,6 @@
 {
-	"name": "xp",
-	"displayName": "xp",
+	"name": "xpdeploy",
+	"displayName": "xpDeploy",
 	"description": "copy files",
 	"version": "0.0.4",
 	"engines": {
@@ -16,19 +16,19 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "xp.deploy",
+				"command": "xpDeploy.deploy",
 				"title": "xpDeploy"
 			},
 			{
-				"command": "xp.deployWithChoice",
+				"command": "xpDeploy.deployWithChoice",
 				"title": "xpDeploy ..."
 			}
 		],
 		"configuration": [
 			{
-				"title": "xp",
+				"title": "xpDeploy",
 				"properties": {
-					"xp": {
+					"xpDeploy": {
 						"type": "object",
 						"properties": {
 							"defaultDeployment": {

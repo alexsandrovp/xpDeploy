@@ -98,7 +98,7 @@ function createButton(xpSettings) {
 	if (xpSettings.createButton) {
 		const button = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
 		button.text = (xpSettings.createButton.label || '').toString().trim() || 'xpDeploy';
-		let buttonCmd = xpSettings.createButton.withChoice ? 'xp.deployWithChoice' : 'xp.deploy';
+		let buttonCmd = xpSettings.createButton.withChoice ? 'xpDeploy.deployWithChoice' : 'xpDeploy.deploy';
 		button.command = buttonCmd;
 		button.show();
 	}

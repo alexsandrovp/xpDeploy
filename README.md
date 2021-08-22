@@ -24,8 +24,10 @@ Windows Explorer 'Extract all' command will create an extra folder with the same
 
 ## Settings
 ```json
-"xp": {
+"xpDeploy": {
 	"defaultDeployment": "latest",
+	"watch": "latest",
+	"watchBatchDelay": 600,
 	"createButton": {
 		"label": "Deploy to localhost",
 		"withChoice": true

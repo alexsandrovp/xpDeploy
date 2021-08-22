@@ -18,12 +18,12 @@ function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Extension "xp" is now active');
+	console.log('xpDeploy: activating...');
 
-	xpSettings = vscode.workspace.getConfiguration('xp');
+	xpSettings = vscode.workspace.getConfiguration('xpDeploy');
 	const error = xpu.getSettingsError(xpSettings);
 	if (error) {
-		console.error('Extension "xp" settings error: ' + error);
+		console.error('xpDeploy: settings error, ' + error);
 		vscode.window.showErrorMessage('xpDeploy: ' + error);
 		return;
 	}
@@ -33,12 +33,12 @@ function activate(context) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('xp.deploy', function () {
+	let disposable = vscode.commands.registerCommand('xpDeploy.deploy', function () {
 		xpcmd.deploy(xpSettings);
 	});
 	context.subscriptions.push(disposable);
 
-	disposable = vscode.commands.registerCommand('xp.deployWithChoice', function () {
+	disposable = vscode.commands.registerCommand('xpDeploy.deployWithChoice', function () {
 		xpcmd.deployWithChoice(xpSettings);
 	});
 	context.subscriptions.push(disposable);
