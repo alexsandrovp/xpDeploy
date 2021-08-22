@@ -23,6 +23,7 @@ function XPWatcher(xpSettings) {
 		return;
 	}
 
+	const targetPath = vscode.Uri.parse(watchSettings.target);
 	const strPattern = xpu.buildGlobPattern(watchSettings.include);
 	const pattern = new vscode.RelativePattern(workspace.uri, strPattern);
 	const watcher = vscode.workspace.createFileSystemWatcher(pattern);
@@ -49,7 +50,7 @@ function XPWatcher(xpSettings) {
 			});
 		});
 		t.then(
-			msg => vscode.window.setStatusBarMessage(msg || 'Deploy (watch): all done', 4000),
+			msg => console.debug(msg || 'Deploy (watch): batch done'),
 			err => vscode.window.showErrorMessage('Deploy error (watch): ' + err)
 		);
 		return {progress: p, resolve, reject};
@@ -57,10 +58,9 @@ function XPWatcher(xpSettings) {
 
 	function execute() {
 		let hasErrors = false;
+		console.debug('Deploy (watch): starting a new batch');
 		while(queue.length) {
 			try {
-				//const runner = queue.shift();
-				//if (runner) setTimeout(runner);
 				queue.shift()();
 			} catch (error) {
 				console.error('xpDeploy watch: ' + error);
@@ -90,23 +90,21 @@ function XPWatcher(xpSettings) {
 			return;
 		}
 
-		const targetPath = vscode.Uri.parse(watchSettings.target);
-
-		if (executor) {
-			clearTimeout(executor);
-			executor = null;
-		}
-
-		if (!toaster) {
-			toaster = createToaster();
-			toaster.progress.report({ message: 'copying' });
-		}
-
 		vscode.workspace.fs.stat(file).then(
 			stats => {
 				if (stats.type === vscode.FileType.Directory) {
 					console.debug('xpDeploy watch: ignoring directory, ' + file.fsPath);
 				} else {
+					if (executor) {
+						clearTimeout(executor);
+						executor = null;
+					}
+
+					if (!toaster) {
+						toaster = createToaster();
+						toaster.progress.report({ message: 'copying' });
+					}
+
 					try {
 						console.debug('xpDeploy watch: event type=' + event.type + ', file=' + JSON.stringify(file));
 						let subpath = file.path.substr(workspace.uri.path.length + 1);
@@ -124,10 +122,11 @@ function XPWatcher(xpSettings) {
 							xpu.mkdir(dest);
 							fs.copyFileSync(file.fsPath, dest);
 						});
-						executor = setTimeout(execute, 600);
 					} catch (error) {
 						console.error('xpDeploy watch: ' + error);
 						vscode.window.showErrorMessage('xpDeploy watch: ' + error);
+					} finally {
+						executor = setTimeout(execute, watchSettings.watchBatchDelay || 600);
 					}
 				}
 			},
