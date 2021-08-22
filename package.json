@@ -2,7 +2,7 @@
 	"name": "xpdeploy",
 	"displayName": "xpDeploy",
 	"description": "copy files",
-	"version": "0.0.4",
+	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.59.0"
 	},
