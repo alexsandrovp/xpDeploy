@@ -141,6 +141,10 @@
 								"type": "integer",
 								"default": 800,
 								"description": "milisseconds to wait without any watcher events before dispatching a batch of files"
+							},
+							"variables": {
+								"description": "a set of key/value pairs to search and replace in deployment targets",
+								"type": "object"
 							}
 						}
 					}

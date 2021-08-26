@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const vscode = require('vscode');
 
+const deploymentsAlreadyReplaced = [];
+
 function mkdir(filePath) {
 	const d = path.dirname(filePath);
 	if (!fs.existsSync(d)) {
@@ -27,6 +29,8 @@ function checkDeploymentSetting(xpSettings, deployment, checkTargetExists) {
 
 	const source = xpSettings.sources.find(i => i.name === deployment.source);
 	if (!source) return 'invalid configuration, selected source does not exist, ' + deployment.source;
+
+	replaceVariables(xpSettings, deployment);
 	if (checkTargetExists && !fs.existsSync(deployment.target)) return 'invalid configuration, selected target path does not exist';
 
 	return null;
@@ -74,6 +78,19 @@ function selectDeployment(xpSettings, deploymentName) {
 		};
 	}
 	return ret;
+}
+
+function replaceVariables(xpSettings, deployment) {
+	if (xpSettings.variables) {
+		if (!deploymentsAlreadyReplaced.find(s => s === deployment.name)) {
+			Object.getOwnPropertyNames(xpSettings.variables).forEach(k => {
+				const key = '${' + k + '}';
+				const val = xpSettings.variables[k];
+				deployment.target = deployment.target.replaceAll(key, val);
+				deploymentsAlreadyReplaced.push(deployment.name);
+			});
+		}
+	}
 }
 
 function buildGlobPattern(pattern) {
